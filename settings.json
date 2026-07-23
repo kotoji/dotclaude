@@ -1,0 +1,102 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(pwd:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(rg:*)",
+      "Bash(jq:*)",
+      "Bash(git log *)",
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(buf generate:*)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": [
+      "Read(//.env)",
+      "Edit(//.env)",
+      "Read(//**/.env)",
+      "Edit(//**/.env)",
+      "Read(//**/.envrc)",
+      "Edit(//**/.envrc)",
+      "Read(//**/.aws/**)",
+      "Edit(//**/.aws/**)",
+      "Read(//**/.ssh/**)",
+      "Edit(//**/.ssh/**)",
+      "Read(//**/*.tfstate)",
+      "Edit(//**/*.tfstate)",
+      "Read(//**/*.tfstate.*)",
+      "Edit(//**/*.tfstate.*)"
+    ],
+    "ask": [
+      "Bash(sh *)",
+      "Bash(bash *)",
+      "Bash(zsh *)",
+      "Bash(fish *)",
+      "Bash(ash *)",
+      "Bash(csh *)",
+      "Bash(nu *)",
+      "Bash(perl *)",
+      "Bash(python *)",
+      "Bash(ruby *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(nc *)",
+      "Bash(netcat *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(rm *)",
+      "Bash(mv *)"
+    ]
+  },
+  "model": "global.anthropic.claude-opus-4-6-v1[1m]",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/discord-notify.sh \"🤔 Your turn — waiting on input\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/discord-notify.sh --min-duration 30 \"✨ Done — all yours\""
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/bin/statusline"
+  },
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "figma@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "skipWorkflowUsageWarning": true,
+  "theme": "dark"
+}
