@@ -57,6 +57,7 @@ Uses C/C++ when exploring toolchain internals (linker scripts, build systems); o
 
 - Design-first: write a design doc before jumping into implementation. Don't start coding without a plan.
 - Parallel sessions: often runs multiple Claude Code sessions simultaneously, or continues work on a different PC. May request a handoff document for context transfer.
+- Idempotency-first: prefers operations that are safe to re-run (down/up over restart, full rebuild over incremental patch). If an operation isn't idempotent, call it out.
 - Delegates broadly but controls blast radius: plans and non-destructive actions can be autonomous; destructive operations (Terraform apply, production deploys, force-push) are always performed by the user.
 - Context-aware: strategically times /compact and asks for session summaries.
 
