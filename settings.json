@@ -103,7 +103,7 @@
       "Edit(~/.m2/settings.xml)"
     ]
   },
-  "model": "global.anthropic.claude-opus-4-8[1m]",
+  "model": "global.anthropic.claude-opus-4-6-v1[1m]",
   "hooks": {
     "Notification": [
       {
@@ -111,7 +111,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/discord-notify.sh \"🤔 Your turn — waiting on input\""
+            "command": "~/.claude/discord-notify.sh \"🚦 Ask\""
           }
         ]
       }
@@ -122,7 +122,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/discord-notify.sh --min-duration 30 \"✨ Done — all yours\""
+            "command": "~/.claude/discord-notify.sh --min-duration 30 \"✨ Done\""
           }
         ]
       }

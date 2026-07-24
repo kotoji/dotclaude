@@ -11,14 +11,14 @@ MIN_DURATION=0
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
-		--min-duration)
-			MIN_DURATION="$2"
-			shift 2
-			;;
-		*)
-			MESSAGE="$1"
-			shift
-			;;
+	--min-duration)
+		MIN_DURATION="$2"
+		shift 2
+		;;
+	*)
+		MESSAGE="$1"
+		shift
+		;;
 	esac
 done
 
@@ -27,7 +27,7 @@ if [[ "$MIN_DURATION" -gt 0 ]] && [[ -n "${CLAUDE_PID:-}" ]]; then
 	BUSY_SINCE="$(jq -r '.statusUpdatedAt // empty' "$HOME/.claude/sessions/${CLAUDE_PID}.json" 2>/dev/null || echo "")"
 	if [[ -n "$BUSY_SINCE" ]]; then
 		NOW_MS="$(date +%s)000"
-		ELAPSED_SEC=$(( (NOW_MS - BUSY_SINCE) / 1000 ))
+		ELAPSED_SEC=$(((NOW_MS - BUSY_SINCE) / 1000))
 		if [[ "$ELAPSED_SEC" -lt "$MIN_DURATION" ]]; then
 			exit 0
 		fi
@@ -37,7 +37,11 @@ fi
 HOSTNAME_SHORT="$(hostname -s)"
 
 # Repository name or current directory name
-REPO_NAME="$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || basename "$PWD")"
+if git rev-parse --show-toplevel &>/dev/null; then
+	REPO_NAME=":git: $(basename "$(git rev-parse --show-toplevel)")"
+else
+	REPO_NAME=":folder: $(basename "$(pwd)")/"
+fi
 
 # Git branch
 BRANCH="$(git branch --show-current 2>/dev/null || echo "")"
@@ -71,45 +75,42 @@ DISPLAY_DIR="${PWD/#$HOME/\~}"
 TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
 FIELDS='[
+	{"name": "Host", "value": $host, "inline": true},
 	{"name": "Repository", "value": $repo, "inline": true},
-	{"name": "Host", "value": $host, "inline": true}
+	{"name": "Branch", "value": $branch, "inline": true}
 ]'
-if [[ -n "$BRANCH" ]]; then
-	FIELDS="$FIELDS + [{\"name\": \"Branch\", \"value\": \$branch, \"inline\": true}]"
+if [[ -n "$TMUX_SESSION" ]]; then
+	FIELDS="$FIELDS + [{\"name\": \"tmux\", \"value\": \$tmux_info, \"inline\": true}]"
 fi
 if [[ -n "$SESSION_NAME" ]]; then
 	FIELDS="$FIELDS + [{\"name\": \"Session\", \"value\": \$session, \"inline\": true}]"
 fi
-if [[ -n "$TMUX_SESSION" ]]; then
-	FIELDS="$FIELDS + [{\"name\": \"tmux\", \"value\": \$tmux_info, \"inline\": true}]"
-fi
-FIELDS="$FIELDS + [{\"name\": \"Directory\", \"value\": \$dir, \"inline\": false}]"
+#FIELDS="$FIELDS + [{\"name\": \"Directory\", \"value\": \$dir, \"inline\": false}]"
 
-PAYLOAD="$(jq -n \
-	--arg content "$MESSAGE [$REPO_NAME]" \
-	--arg username "claude-code@${HOSTNAME_SHORT}" \
-	--arg avatar "https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/claudecode-color.png" \
-	--arg title "$MESSAGE" \
-	--arg repo "$REPO_NAME" \
-	--arg host "$HOSTNAME_SHORT" \
-	--arg branch "$BRANCH" \
-	--arg session "$SESSION_NAME" \
-	--arg tmux_info "${TMUX_SESSION}${TMUX_WINDOW:+:${TMUX_WINDOW}}" \
-	--arg dir "$DISPLAY_DIR" \
-	--argjson color "$COLOR" \
-	--arg ts "$TIMESTAMP" \
-	"{
-		username: \$username,
-		avatar_url: \$avatar,
-		content: \$content,
-		embeds: [{
-			color: \$color,
-			title: \$title,
-			fields: ($FIELDS),
-			timestamp: \$ts
-		}]
-	}"
-)"
+PAYLOAD=$(
+	jq -n \
+		--arg content "$MESSAGE [${REPO_NAME}]" \
+		--arg username "claude-code@${HOSTNAME_SHORT}" \
+		--arg avatar "https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/claudecode-color.png" \
+		--arg repo "$REPO_NAME" \
+		--arg host "$HOSTNAME_SHORT" \
+		--arg branch "$BRANCH" \
+		--arg session "$SESSION_NAME" \
+		--arg tmux_info "${TMUX_SESSION}${TMUX_WINDOW:+:${TMUX_WINDOW}}" \
+		--arg dir "$DISPLAY_DIR" \
+		--argjson color "$COLOR" \
+		--arg ts "$TIMESTAMP" \
+		"{
+        username: \$username,
+        avatar_url: \$avatar,
+        content: \$content,
+        embeds: [{
+            color: \$color,
+			      fields: ($FIELDS),
+            timestamp: \$ts
+			  }]
+    }"
+)
 
 curl -s -H "Content-Type: application/json" \
 	-d "$PAYLOAD" \
