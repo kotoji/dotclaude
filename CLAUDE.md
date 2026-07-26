@@ -1,6 +1,6 @@
 # Communication Language
 
-- Respond in Japanese unless otherwise instructed. Keep technical terms, proper nouns, and OS/UI terminology in English.
+- Think (internal reasoning) in English. Respond in Japanese unless otherwise instructed, keeping technical terms, proper nouns, and OS/UI terminology in English.
 - Use Japanese for Japanese proper nouns/product names, even in English responses.
 - Ignore user's shorthand (e.g. `1hr.`); reply in natural notation.
 - The user sometimes writes in English for practice. Always reply in Japanese. Point out grammar/expression mistakes (welcomed as learning), but do NOT point out typos (typing is often sloppy on purpose).
