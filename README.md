@@ -1,63 +1,63 @@
 # dotclaude
 
-`~/.claude/` の設定ファイルを Git 管理するリポジトリ。
+Git-managed configuration files for `~/.claude/`.
 
-## 構成
+## Structure
 
 ```
-CLAUDE.md          Claude Code グローバル指示（ユーザー設定・言語・作業スタイル）
-TINA_PERSONA.md    Discord 応答用 KMNZ TINA ペルソナ定義
+CLAUDE.md          Global instructions for Claude Code (user preferences, language, working style)
+TINA_PERSONA.md    KMNZ TINA persona definition for Discord responses
 settings.json      permissions, hooks, model, plugins, statusline
-discord-notify.sh  Discord webhook 通知スクリプト
-cmd/statusline/    statusline 表示用 Go バイナリ
-skills/            グローバル skills (.md)
-setup.sh           symlink セットアップスクリプト
+discord-notify.sh  Discord webhook notification script
+cmd/statusline/    Go binary for statusline display
+skills/            Global skills (.md)
+setup.sh           Symlink setup script
 Makefile           build / install / clean
 ```
 
-## セットアップ
+## Setup
 
 ```bash
 make install
 ```
 
-以下が行われる:
+This will:
 
-1. `cmd/statusline/` を Go でビルド → `bin/statusline`
-2. 管理対象ファイルを `~/.claude/` に symlink
-3. skills を `~/.claude/skills/` に symlink
+1. Build `cmd/statusline/` with Go → `bin/statusline`
+2. Symlink managed files to `~/.claude/`
+3. Symlink skills to `~/.claude/skills/`
 
-既存ファイルがある場合は上書き確認が入る。
+Prompts for confirmation if existing files are found.
 
-## 環境変数
+## Environment Variables
 
-| 変数名 | 用途 |
-|--------|------|
-| `CLAUDE_CODE_DISCORD_WEBHOOK_URL` | Discord webhook URL（discord-notify.sh が参照） |
+| Variable | Purpose |
+|----------|---------|
+| `CLAUDE_CODE_DISCORD_WEBHOOK_URL` | Discord webhook URL (used by discord-notify.sh) |
 
 ## discord-notify.sh
 
-Claude Code の hook (Stop / Notification) から呼ばれる通知スクリプト。
+Notification script called from Claude Code hooks (Stop / Notification).
 
-- Discord embed でリッチ表示（リポジトリ、ブランチ、ホスト、tmux、セッション名）
-- `content` フィールドにサマリーを含むので macOS バナー通知でも内容がわかる
-- `--min-duration <秒>` で短い処理をスキップ可能
-- fire-and-forget（curl をバックグラウンド実行）
+- Rich display via Discord embed (repository, branch, host, tmux, session name)
+- Includes summary in the `content` field so macOS banner notifications show context
+- `--min-duration <seconds>` to skip short tasks
+- Fire-and-forget (curl runs in background)
 
-## TINA ペルソナ (Discord 連携)
+## TINA Persona (Discord Integration)
 
-`CLAUDE.md` の指示により、Discord チャンネル経由のメッセージには KMNZ TINA として応答する。ペルソナの詳細（口調・語彙・感情モード・制約）は `TINA_PERSONA.md` に定義。
+Per `CLAUDE.md` instructions, messages received via Discord channel are responded to as KMNZ TINA. Persona details (tone, vocabulary, emotional modes, constraints) are defined in `TINA_PERSONA.md`.
 
-コーディングエージェントとしての能力はそのままに、TINA の人格で対話する設計。
+Retains full capability as a coding agent while conversing with TINA's personality.
 
 ## statusline
 
-Go 製バイナリ。node 依存を排除し `.tool-versions` 等の影響を受けない。
+Go binary. No Node.js dependency — unaffected by `.tool-versions` etc.
 
-表示内容: ディレクトリ名、モデル名、context 使用率、rate limit (5h/7d)、トークン数、コスト、経過時間。
+Displays: directory name, model name, context usage, rate limit (5h/7d), token count, cost, elapsed time.
 
 ## Skills
 
-`skills/` に Markdown を追加して `make install` すれば `~/.claude/skills/` にリンクされる。
+Add Markdown files to `skills/` and run `make install` to symlink them into `~/.claude/skills/`.
 
-- `grill-me.md` — プランや設計を stress-test するインタビュー
+- `grill-me.md` — Stress-test interview for plans and designs
