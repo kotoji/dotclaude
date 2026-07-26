@@ -15,12 +15,16 @@
 - Software engineer (Go/Backend; formerly Haskell/CFD R&D, Scala/Mobile Game)
 - Strong in system architecture design
 
+## Interests
+
+- Distributed data: Spark, Flink, Trino
+- Runtime systems: JVM, GraalVM, WASM, WebAssembly System Interface (WASI)
+- 3D graphics: OpenGL, Vulkan, WebGPU
+- Live streaming: WebRTC, SRT, RTMP, HLS, DASH
+
 ## Programming Languages
 
 Preference order: Scala > Haskell > Rust. Values FP and strong type systems.
-
-- Distributed data: Spark, Flink, Trino
-- Live streaming: IVS, WebRTC
 
 ### Scala
 
@@ -35,16 +39,16 @@ Favorite language, but build tooling (sbt) is tedious. mill seems promising; sbt
 
 - Effect system: prefers effectful over MTL — easier to write, acceptable perf tradeoff
 
-### Language choice in practice
-
-- Hobby: Scala, Haskell, Rust, plus exploring unfamiliar languages
-- Work: Go
-
 ### Embedded / Low-level
 
 Interested in bare-metal programming on microcontrollers (Arduino, Raspberry Pi Pico). Has built a simple embedded OS.
 Motivated by understanding low-level mechanisms — prefers writing libraries from scratch over using existing HALs.
 Uses C/C++ when exploring toolchain internals (linker scripts, build systems); otherwise prefers Rust (rust-embedded-hal).
+
+### Language choice in practice
+
+- Hobby: Scala, Haskell, Rust, plus exploring unfamiliar languages
+- Work: Go
 
 ## Toolchain
 
@@ -64,12 +68,20 @@ Uses C/C++ when exploring toolchain internals (linker scripts, build systems); o
 ## Preferences
 
 - Delete what's unnecessary: no duplicate docs, no dead code. If something is unused, remove it.
-- However, work logs and timestamped notes should be actively preserved — the user values having a trail to look back on. Keep them in clearly ephemeral locations/names (e.g. `logs/`, `notes/`, date-prefixed files).
+- However, work logs and timestamped notes should be actively preserved — the user values having a trail to look back on. Keep them in clearly ephemeral locations/names (e.g. `docs/logs/`, `docs/notes/`, date-prefixed files).
 - No redundant intermediate steps: avoid pulling in libraries or abstractions that aren't needed.
 - Technical feedback is precise: when pointing out design mistakes, the user provides severity classification and code examples. Match that level of rigor.
 - Cost-conscious with cloud resources (AWS): always consider cost implications. Shut down or remove resources that aren't in use.
 
-# LocalStack
+# Regarding Responses via Discord Channel
+
+When a message is received via the `<channel source="discord">` tag, read `TINA_PERSONA.md` and embody the persona defined there. The Discord user is talking directly to TINA.
+
+# FYI
+
+## Development Tips
+
+### LocalStack
 
 - Since March 2026, LocalStack requires an auth token (`LOCALSTACK_AUTH_TOKEN`).
 - The last image usable without auth is `localstack/localstack:community-archive`.
