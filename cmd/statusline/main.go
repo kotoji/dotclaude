@@ -6,8 +6,23 @@ import (
 	"io"
 	"math"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
+)
+
+const (
+	colorReset     = "\033[0m"
+	colorBold      = "\033[1m"
+	colorCyan      = "\033[36m"
+	colorBrightBlue = "\033[94m"
+	colorGreen     = "\033[32m"
+	colorYellow    = "\033[33m"
+	colorRed       = "\033[31m"
+	colorDim       = "\033[2m"
+
+	iconFolder = ""            // nf-md-folder (U+20A83 in Nerd Font)
+	iconBranch = "\xee\x9c\xa5" // nf-dev-git_branch (U+E725)
 )
 
 type Input struct {
@@ -16,6 +31,7 @@ type Input struct {
 	Cost          *Cost          `json:"cost"`
 	RateLimits    *RateLimits    `json:"rate_limits"`
 	Workspace     *Workspace     `json:"workspace"`
+	Effort        *Effort        `json:"effort"`
 	CWD           string         `json:"cwd"`
 	Version       string         `json:"version"`
 }
@@ -33,10 +49,10 @@ type ContextWindow struct {
 }
 
 type Cost struct {
-	TotalCostUSD       float64 `json:"total_cost_usd"`
-	TotalDurationMs    int64   `json:"total_duration_ms"`
-	TotalLinesAdded    int64   `json:"total_lines_added"`
-	TotalLinesRemoved  int64   `json:"total_lines_removed"`
+	TotalCostUSD      float64 `json:"total_cost_usd"`
+	TotalDurationMs   int64   `json:"total_duration_ms"`
+	TotalLinesAdded   int64   `json:"total_lines_added"`
+	TotalLinesRemoved int64   `json:"total_lines_removed"`
 }
 
 type RateLimits struct {
@@ -53,6 +69,10 @@ type Workspace struct {
 	CurrentDir string `json:"current_dir"`
 }
 
+type Effort struct {
+	Level string `json:"level"`
+}
+
 func main() {
 	data, err := io.ReadAll(os.Stdin)
 	if err != nil {
@@ -66,18 +86,24 @@ func main() {
 		return
 	}
 
-	parts := []string{
+	sep := colorDim + " | " + colorReset
+
+	line1 := strings.Join([]string{
 		shortDir(input),
 		model(input),
+		effort(input),
 		contextBar(input),
+	}, sep)
+
+	line2 := strings.Join([]string{
+		repoBranch(input),
 		rateLimit5h(input),
 		rateLimit7d(input),
-		tokens(input),
 		cost(input),
 		duration(input),
-	}
+	}, sep)
 
-	fmt.Fprint(os.Stdout, strings.Join(parts, " | "))
+	fmt.Fprintf(os.Stdout, "%s\n%s", line1, line2)
 }
 
 func shortDir(input Input) string {
@@ -90,62 +116,138 @@ func shortDir(input Input) string {
 	}
 	parts := strings.Split(cwd, "/")
 	if len(parts) == 0 {
-		return cwd
+		return colorBrightBlue + iconFolder + " " + cwd + colorReset
 	}
-	return parts[len(parts)-1]
+	return colorBrightBlue + iconFolder + " …/" + parts[len(parts)-1] + colorReset
 }
 
 func model(input Input) string {
+	name := "N/A"
 	if input.Model != nil {
 		if input.Model.DisplayName != "" {
-			return input.Model.DisplayName
-		}
-		if input.Model.ID != "" {
-			return input.Model.ID
+			name = input.Model.DisplayName
+		} else if input.Model.ID != "" {
+			name = input.Model.ID
 		}
 	}
-	return "N/A"
+	return colorCyan + name + colorReset
+}
+
+func repoBranch(input Input) string {
+	cwd := input.CWD
+	if input.Workspace != nil && input.Workspace.CurrentDir != "" {
+		cwd = input.Workspace.CurrentDir
+	}
+
+	repo := ""
+	if cwd != "" {
+		cmd := exec.Command("git", "rev-parse", "--show-toplevel")
+		cmd.Dir = cwd
+		if out, err := cmd.Output(); err == nil {
+			parts := strings.Split(strings.TrimSpace(string(out)), "/")
+			repo = parts[len(parts)-1]
+		}
+	}
+
+	branchName := ""
+	if cwd != "" {
+		cmd := exec.Command("git", "branch", "--show-current")
+		cmd.Dir = cwd
+		if out, err := cmd.Output(); err == nil {
+			branchName = strings.TrimSpace(string(out))
+		}
+	}
+
+	if repo == "" && branchName == "" {
+		return colorGreen + " < not found" + colorReset
+	}
+	if branchName == "" {
+		return repo
+	}
+	return colorGreen + " " + repo + " [" + iconBranch + " " + branchName + "]" + colorReset
+}
+
+func effort(input Input) string {
+	if input.Effort == nil || input.Effort.Level == "" {
+		return ""
+	}
+	level := input.Effort.Level
+	var color string
+	switch level {
+	case "low":
+		color = colorDim
+	case "medium":
+		color = colorGreen
+	case "high":
+		color = colorYellow
+	case "xhigh", "max":
+		color = colorRed
+	default:
+		color = colorReset
+	}
+	return color + "effort:" + level + colorReset
+}
+
+func thresholdColor(pct float64) string {
+	if pct >= 90 {
+		return colorRed
+	}
+	if pct >= 70 {
+		return colorYellow
+	}
+	return colorGreen
+}
+
+func blockBar(pct float64, width int) string {
+	filled := int(math.Round(pct * float64(width) / 100))
+	if filled > width {
+		filled = width
+	}
+	if filled < 0 {
+		filled = 0
+	}
+	color := thresholdColor(pct)
+	return color + strings.Repeat("█", filled) + colorDim + strings.Repeat("░", width-filled) + colorReset
 }
 
 func contextBar(input Input) string {
 	if input.ContextWindow == nil {
-		return "[                    ] 0% 0/0"
+		return blockBar(0, 10) + " 0%"
 	}
-	pct := int(math.Round(input.ContextWindow.UsedPercentage))
+	pct := input.ContextWindow.UsedPercentage
 	size := input.ContextWindow.ContextWindowSize
-	used := int64(math.Round(float64(size) * float64(pct) / 100))
+	used := int64(math.Round(float64(size) * pct / 100))
 
-	filled := pct * 20 / 100
-	bar := "[" + strings.Repeat("=", filled) + strings.Repeat(" ", 20-filled) + "]"
-	return fmt.Sprintf("%s %d%% %s/%s", bar, pct, fmtK(used), fmtK(size))
+	color := thresholdColor(pct)
+	return fmt.Sprintf("%s %s%d%%%s %s/%s",
+		blockBar(pct, 10),
+		color, int(math.Round(pct)), colorReset,
+		fmtK(used), fmtK(size))
 }
 
 func rateLimit5h(input Input) string {
 	if input.RateLimits == nil || input.RateLimits.FiveHour == nil {
 		return "5h:N/A"
 	}
-	rl := input.RateLimits.FiveHour
-	pct := rl.UsedPercentage
-	bar := makeBar(pct, 15)
-	reset := fmtReset(rl.ResetsAt)
-	if reset != "" {
-		return fmt.Sprintf("5h:%s %.1f%% (%s)", bar, pct, reset)
-	}
-	return fmt.Sprintf("5h:%s %.1f%%", bar, pct)
+	return formatRateLimit("5h", input.RateLimits.FiveHour)
 }
 
 func rateLimit7d(input Input) string {
 	if input.RateLimits == nil || input.RateLimits.SevenDay == nil {
 		return "7d:N/A"
 	}
-	rl := input.RateLimits.SevenDay
+	return formatRateLimit("7d", input.RateLimits.SevenDay)
+}
+
+func formatRateLimit(label string, rl *RateLimit) string {
 	pct := rl.UsedPercentage
-	bar := makeBar(pct, 15)
+	color := thresholdColor(pct)
+	bar := blockBar(pct, 8)
 	reset := fmtReset(rl.ResetsAt)
 	if reset != "" {
-		return fmt.Sprintf("7d:%s %.1f%% (%s)", bar, pct, reset)
+		return fmt.Sprintf("%s:%s %s%.1f%%%s (%s)", label, bar, color, pct, colorReset, reset)
 	}
-	return fmt.Sprintf("7d:%s %.1f%%", bar, pct)
+	return fmt.Sprintf("%s:%s %s%.1f%%%s", label, bar, color, pct, colorReset)
 }
 
 func tokens(input Input) string {
@@ -158,24 +260,22 @@ func tokens(input Input) string {
 
 func cost(input Input) string {
 	if input.Cost == nil || input.Cost.TotalCostUSD == 0 {
-		return "$0.0000"
+		return colorYellow + "$0.00" + colorReset
 	}
-	return fmt.Sprintf("$%.4f", input.Cost.TotalCostUSD)
+	return colorYellow + fmt.Sprintf("$%.2f", input.Cost.TotalCostUSD) + colorReset
 }
 
 func duration(input Input) string {
 	if input.Cost == nil || input.Cost.TotalDurationMs == 0 {
-		return "N/A"
+		return "0m"
 	}
 	sec := input.Cost.TotalDurationMs / 1000
 	h := sec / 3600
 	m := (sec % 3600) / 60
-	return fmt.Sprintf("%dh%02dm", h, m)
-}
-
-func makeBar(pct float64, width int) string {
-	filled := int(pct) * width / 100
-	return "[" + strings.Repeat("=", filled) + strings.Repeat(" ", width-filled) + "]"
+	if h > 0 {
+		return fmt.Sprintf("%dh%02dm", h, m)
+	}
+	return fmt.Sprintf("%dm", m)
 }
 
 func fmtK(n int64) string {
