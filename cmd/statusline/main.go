@@ -61,8 +61,28 @@ type RateLimits struct {
 }
 
 type RateLimit struct {
-	UsedPercentage float64 `json:"used_percentage"`
-	ResetsAt       string  `json:"resets_at"`
+	UsedPercentage float64        `json:"used_percentage"`
+	ResetsAt       json.RawMessage `json:"resets_at"`
+}
+
+func (rl *RateLimit) ResetTime() (time.Time, bool) {
+	if len(rl.ResetsAt) == 0 {
+		return time.Time{}, false
+	}
+	var s string
+	if json.Unmarshal(rl.ResetsAt, &s) == nil && s != "" {
+		t, err := time.Parse(time.RFC3339, s)
+		return t, err == nil
+	}
+	var n float64
+	if json.Unmarshal(rl.ResetsAt, &n) == nil && n > 0 {
+		sec := int64(n)
+		if sec > 1e12 {
+			sec /= 1000
+		}
+		return time.Unix(sec, 0), true
+	}
+	return time.Time{}, false
 }
 
 type Workspace struct {
@@ -243,7 +263,10 @@ func formatRateLimit(label string, rl *RateLimit) string {
 	pct := rl.UsedPercentage
 	color := thresholdColor(pct)
 	bar := blockBar(pct, 8)
-	reset := fmtReset(rl.ResetsAt)
+	reset := ""
+	if t, ok := rl.ResetTime(); ok {
+		reset = fmtDuration(time.Until(t))
+	}
 	if reset != "" {
 		return fmt.Sprintf("%s:%s %s%.1f%%%s (%s)", label, bar, color, pct, colorReset, reset)
 	}
@@ -288,19 +311,11 @@ func fmtK(n int64) string {
 	return fmt.Sprintf("%d", n)
 }
 
-func fmtReset(iso string) string {
-	if iso == "" {
-		return ""
+func fmtDuration(d time.Duration) string {
+	if d < 0 {
+		d = 0
 	}
-	t, err := time.Parse(time.RFC3339, iso)
-	if err != nil {
-		return ""
-	}
-	diff := time.Until(t)
-	if diff < 0 {
-		diff = 0
-	}
-	mins := int(diff.Minutes())
+	mins := int(d.Minutes())
 	if mins < 60 {
 		return fmt.Sprintf("%dm", mins)
 	}
