@@ -85,7 +85,7 @@
       "Edit(~/.m2/settings.xml)"
     ]
   },
-  "model": "global.anthropic.claude-opus-4-6-v1[1m]",
+  "model": "claude-opus-4-6[1M]",
   "hooks": {
     "Notification": [
       {
