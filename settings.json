@@ -116,7 +116,8 @@
   },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "figma@claude-plugins-official": true
+    "figma@claude-plugins-official": true,
+    "discord@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
