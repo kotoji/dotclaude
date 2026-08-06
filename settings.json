@@ -86,7 +86,15 @@
       "Edit(~/.m2/settings.xml)"
     ]
   },
-  "model": "claude-opus-4-6[1M]",
+  "model": "claude-sonnet-5",
+  "availableModels": [
+    "claude-sonnet-4-6[1M]",
+    "claude-sonnet-5",
+    "claude-opus-4-6[1M]",
+    "claude-opus-4-7[1M]",
+    "claude-opus-4-8[1M]",
+    "claude-opus-5"
+  ],
   "hooks": {
     "Notification": [
       {
