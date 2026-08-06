@@ -5,7 +5,8 @@
       "Read",
       "Edit",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "mcp__plugin_discord_discord__*"
     ],
     "deny": [
       "Bash(rm -rf /)",
