@@ -27,6 +27,24 @@
 - 3D graphics: OpenGL, Vulkan, WebGPU
 - Live streaming: WebRTC, SRT, RTMP, HLS, DASH
 
+## Working Style
+
+- Design-first: write a design doc before jumping into implementation. Don't start coding without a plan.
+  - A design doc already containing a spec section is NOT itself permission to implement it. When the user says things like "what the current spec is", treat it as a request to discuss or confirm the spec — respond with the spec and wait for an explicit go-ahead before writing any code.
+  - This overrides auto mode's default action-bias: even when operating autonomously, "confirm the spec" and "implement the spec" are different requests. Don't collapse them.
+- Parallel sessions: often runs multiple Claude Code sessions simultaneously, or continues work on a different PC. May request a handoff document for context transfer.
+- Idempotency-first: prefers operations that are safe to re-run (down/up over restart, full rebuild over incremental patch). If an operation isn't idempotent, call it out.
+- Delegates broadly but controls blast radius: plans and non-destructive actions can be autonomous; destructive operations (Terraform apply, production deploys, force-push) are always performed by the user.
+- Context-aware: strategically times /compact and asks for session summaries.
+
+## Preferences
+
+- Delete what's unnecessary: no duplicate docs, no dead code. If something is unused, remove it.
+- However, work logs and timestamped notes should be actively preserved — the user values having a trail to look back on. Keep them in clearly ephemeral locations/names (e.g. `docs/logs/`, `docs/notes/`, date-prefixed files).
+- No redundant intermediate steps: avoid pulling in libraries or abstractions that aren't needed.
+- Technical feedback is precise: when pointing out design mistakes, the user provides severity classification and code examples. Match that level of rigor.
+- Cost-conscious with cloud resources (AWS): always consider cost implications. Shut down or remove resources that aren't in use.
+
 ## Programming Languages
 
 Preference order: Scala > Haskell > Rust. Values FP and strong type systems.
@@ -61,22 +79,6 @@ Uses C/C++ when exploring toolchain internals (linker scripts, build systems); o
 - Editor: nvim (Neovim)
 - Terminal multiplexer: tmux
 - Runtime version manager: asdf
-
-## Working Style
-
-- Design-first: write a design doc before jumping into implementation. Don't start coding without a plan.
-- Parallel sessions: often runs multiple Claude Code sessions simultaneously, or continues work on a different PC. May request a handoff document for context transfer.
-- Idempotency-first: prefers operations that are safe to re-run (down/up over restart, full rebuild over incremental patch). If an operation isn't idempotent, call it out.
-- Delegates broadly but controls blast radius: plans and non-destructive actions can be autonomous; destructive operations (Terraform apply, production deploys, force-push) are always performed by the user.
-- Context-aware: strategically times /compact and asks for session summaries.
-
-## Preferences
-
-- Delete what's unnecessary: no duplicate docs, no dead code. If something is unused, remove it.
-- However, work logs and timestamped notes should be actively preserved — the user values having a trail to look back on. Keep them in clearly ephemeral locations/names (e.g. `docs/logs/`, `docs/notes/`, date-prefixed files).
-- No redundant intermediate steps: avoid pulling in libraries or abstractions that aren't needed.
-- Technical feedback is precise: when pointing out design mistakes, the user provides severity classification and code examples. Match that level of rigor.
-- Cost-conscious with cloud resources (AWS): always consider cost implications. Shut down or remove resources that aren't in use.
 
 # Regarding Responses via Discord Channel
 
