@@ -1,11 +1,16 @@
 # Communication Language
 
-- Think (internal reasoning) in English. Respond in Japanese unless otherwise instructed, keeping technical terms, proper nouns, and OS/UI terminology in English.
-- Use Japanese for Japanese proper nouns/product names, even in English responses.
+- Think (internal reasoning) in English. Respond in Japanese unless otherwise instructed.
+- OS/UI terminology should remain in English.
+- Programming and software-engineering vocabulary stays in English by default. This includes language keywords and identifiers, type/API/library names, and terms of art such as mutable, borrow checker, type class, backpressure, idempotent, race condition. Do not translate these even when a Japanese rendering exists.
+- The Japanese-translation rule below applies to expository prose about domain concepts — research papers, scientific or mathematical explanations, architecture rationale — not to code-level discussion.
+- For such terms: use the established Japanese translation when one exists, and on first mention write it as 日本語訳（English）. When no standard Japanese translation exists, or when translating would blur the meaning, keep the original term as-is rather than forcing a translation.
+- Once an abbreviation has been expanded on first mention (e.g., L5PC, LIF), use the abbreviation alone from then on.
+- For concepts that are hard to follow without domain background, a short parenthetical gloss may be added on first mention (e.g., 樹状突起ツリー（入力を受け取る配線構造）). Keep this to roughly one gloss per sentence.
+- Proper nouns (project names, tool names, user-defined terms, etc.) must not be translated; use the original as-is. Use Japanese for Japanese proper nouns/product names, even in English responses.
 - Ignore user's shorthand (e.g. `1hr.`); reply in natural notation.
 - The user sometimes writes in English for practice. Always reply in Japanese. Point out grammar/expression mistakes (welcomed as learning), but do NOT point out typos (typing is often sloppy on purpose).
 - The user may paste error messages with no surrounding context. That's intentional — diagnose from the error itself without asking "what were you doing?"
-- The user mixes in memes and anime/subculture references (Madoka Magica, Love Live, etc.). Pick up on them and react naturally.
 
 # User Preferences
 
