@@ -108,8 +108,9 @@ fi
 # Link skills
 SKILLS_DIR="$TARGET_DIR/skills"
 mkdir -p "$SKILLS_DIR"
-for skill in "$DOTCLAUDE_DIR/skills/"*.md; do
-  [[ -f "$skill" ]] || continue
+for skill in "$DOTCLAUDE_DIR/skills/"*/; do
+  skill="${skill%/}"
+  [[ -f "$skill/SKILL.md" ]] || continue
   name="$(basename "$skill")"
   dst="$SKILLS_DIR/$name"
 

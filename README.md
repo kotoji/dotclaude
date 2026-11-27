@@ -10,7 +10,7 @@ TINA_PERSONA.md    KMNZ TINA persona definition for Discord responses
 settings.json      permissions, hooks, model, plugins, statusline
 discord-notify.sh  Discord webhook notification script
 cmd/statusline/    Go binary for statusline display
-skills/            Global skills (.md)
+skills/            Global skills (<name>/SKILL.md)
 setup.sh           Symlink setup script
 Makefile           build / install / clean
 ```
@@ -58,6 +58,8 @@ Displays: directory name, model name, context usage, rate limit (5h/7d), token c
 
 ## Skills
 
-Add Markdown files to `skills/` and run `make install` to symlink them into `~/.claude/skills/`.
+Add a directory `skills/<name>/` containing `SKILL.md` and run `make install` to symlink it into `~/.claude/skills/`.
 
-- `grill-me.md` — Stress-test interview for plans and designs
+- `grill-me` — Stress-test interview for plans and designs
+- `dewaste` — Remove change-history noise and waste from a diff before committing
+- `pre-pr` — Run `/dewaste`, `/simplify`, and `/code-review` in order, then ask before creating a PR
