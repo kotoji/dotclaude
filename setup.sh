@@ -6,7 +6,7 @@ TARGET_DIR="$HOME/.claude"
 BIN_DIR="$TARGET_DIR/bin"
 
 FILES=(
-  CLAUDE.md
+  _CLAUDE.md
   settings.json
   discord-notify.sh
 )
@@ -33,6 +33,10 @@ mkdir -p "$TARGET_DIR" "$BIN_DIR"
 for file in "${FILES[@]}"; do
   src="$DOTCLAUDE_DIR/$file"
   dst="$TARGET_DIR/$file"
+
+  if [[ $file == "_CLAUDE.md" ]]; then
+    dst="$TARGET_DIR/CLAUDE.md"
+  fi
 
   if [[ ! -f "$src" ]]; then
     echo "  SKIP $file (source not found)"
